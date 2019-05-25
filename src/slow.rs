@@ -1,3 +1,4 @@
+/// Returns the response with the body, but wait some time before delivering it
 use std::net::SocketAddr;
 use std::time::{Duration, Instant};
 

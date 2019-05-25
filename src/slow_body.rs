@@ -1,3 +1,4 @@
+/// Returns the the headers quickly, but then waits 1 seconds between each byte of the response.
 use std::collections::VecDeque;
 use std::net::SocketAddr;
 use std::time::{Duration, Instant};
@@ -29,11 +30,6 @@ pub fn bind(data: &[u8], addr: impl Into<SocketAddr>) -> impl Future<Item = (), 
 }
 
 async fn response(data: Vec<u8>) -> Result<Response<Body>, Error> {
-    // Delay::new(Instant::now() + Duration::from_secs(10))
-    //     .compat()
-    //     .await
-    //     .context(Delaying)?;
-
     let data: VecDeque<_> = data.into();
 
     let stream = unfold(

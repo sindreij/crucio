@@ -1,3 +1,4 @@
+/// Healthy response, this just returns what it should
 use std::net::SocketAddr;
 
 use hyper::rt::Future;

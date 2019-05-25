@@ -1,6 +1,8 @@
 #![feature(async_await)]
 
 mod healthy;
+mod random;
+mod random_text;
 mod slow;
 mod slow_body;
 
@@ -34,6 +36,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         rt::spawn(healthy::bind(&contents, (bind_addr, 3000)));
         rt::spawn(slow::bind(&contents, (bind_addr, 3001)));
         rt::spawn(slow_body::bind(&contents, (bind_addr, 3002)));
+        rt::spawn(random::bind((bind_addr, 3003)));
+        rt::spawn(random_text::bind((bind_addr, 3004)));
 
         Ok(())
     }));
