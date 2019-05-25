@@ -1,3 +1,42 @@
-fn main() {
-    println!("Hello, world!");
+#![feature(async_await)]
+
+mod healthy;
+mod slow;
+mod slow_body;
+
+use std::error::Error;
+use std::fs::File;
+use std::io::prelude::*;
+use std::net::Ipv4Addr;
+use std::path::PathBuf;
+
+use hyper::rt;
+use structopt::StructOpt;
+
+/// A basic example
+#[derive(StructOpt, Debug)]
+#[structopt(name = "basic")]
+struct Opt {
+    #[structopt(short = "f", long = "file", parse(from_os_str))]
+    filename: PathBuf,
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let opt = Opt::from_args();
+
+    let mut file = File::open(opt.filename)?;
+    let mut contents = Vec::new();
+    file.read_to_end(&mut contents)?;
+
+    let bind_addr: Ipv4Addr = [127, 0, 0, 1].into();
+
+    rt::run(rt::lazy(move || {
+        rt::spawn(healthy::bind(&contents, (bind_addr, 3000)));
+        rt::spawn(slow::bind(&contents, (bind_addr, 3001)));
+        rt::spawn(slow_body::bind(&contents, (bind_addr, 3002)));
+
+        Ok(())
+    }));
+
+    Ok(())
 }

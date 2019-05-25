@@ -1,0 +1,1 @@
+- Send random data every 30th second, just keeping the connection open
