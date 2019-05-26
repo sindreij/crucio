@@ -1,4 +1,4 @@
-/// Returns the response with the body, but wait some time before delivering it
+/// Never returns any response, will just wait forever
 use std::net::SocketAddr;
 
 use futures::{future, FutureExt, TryFutureExt};

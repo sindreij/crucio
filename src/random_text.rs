@@ -1,4 +1,4 @@
-/// Returns a infinite stream of random data.
+/// Returns a infinite stream of random text. This will crash browsers because they try to render it.
 use std::net::SocketAddr;
 
 use futures::prelude::*;

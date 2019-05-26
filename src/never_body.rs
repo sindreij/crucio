@@ -24,7 +24,7 @@ pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
 async fn response() -> Result<Response<Body>, Error> {
     let stream = unfold(
         (),
-        async move |_data| -> Option<(Result<Vec<u8>, Error>, ())> {
+        async move |()| -> Option<(Result<Vec<u8>, Error>, ())> {
             let () = future::empty().await;
             Some((Ok(vec![12, 13, 14]), ()))
         },

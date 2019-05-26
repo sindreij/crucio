@@ -1,5 +1,7 @@
 #![feature(async_await)]
 
+mod drop;
+mod echo;
 mod healthy;
 mod never;
 mod never_body;
@@ -42,6 +44,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         rt::spawn(random_text::bind((bind_addr, 3004)));
         rt::spawn(never::bind((bind_addr, 3005)));
         rt::spawn(never_body::bind((bind_addr, 3006)));
+        rt::spawn(echo::bind((bind_addr, 3007)));
+        rt::spawn(drop::bind((bind_addr, 3008)));
 
         Ok(())
     }));
