@@ -3,12 +3,14 @@
 use std::mem;
 use std::net::SocketAddr;
 
+use log::{error, info};
 use tokio;
 use tokio::net::TcpListener;
 use tokio::prelude::*;
 
 pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
     let addr = addr.into();
+    info!("Listening on {}", addr);
     let listener = TcpListener::bind(&addr).unwrap();
 
     // Here we convert the `TcpListener` to a stream of incoming connections
@@ -17,12 +19,13 @@ pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
     listener
         .incoming()
         .for_each(|socket| {
+            info!("Got request");
             // Make sure drop() on socket is never called, i.e. the connection will never be closed
             mem::forget(socket);
             Ok(())
         })
         .map_err(|err| {
             // Handle error by printing to STDOUT.
-            println!("accept error = {:?}", err);
+            error!("accept error = {:?}", err);
         })
 }

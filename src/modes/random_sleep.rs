@@ -7,7 +7,8 @@ use futures::compat::Future01CompatExt;
 use futures::{FutureExt, TryFutureExt};
 use hyper::rt::Future;
 use hyper::service::service_fn;
-use hyper::{Body, Response, Server};
+use hyper::{Body, Request, Response, Server};
+use log::{error, info};
 use rand::distributions::LogNormal;
 use rand::prelude::*;
 use snafu::{ResultExt, Snafu};
@@ -20,24 +21,32 @@ enum Error {
 
 pub fn bind(data: &[u8], addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
     let addr = addr.into();
+    info!("Listening on {}", addr);
 
     let data = data.to_owned();
     let new_svc = move || {
         let data = data.clone();
-        service_fn(move |_| response(data.clone()).boxed().compat())
+        service_fn(move |request| response(request, data.clone()).boxed().compat())
     };
 
     Server::bind(&addr)
         .serve(new_svc)
-        .map_err(|e| eprintln!("server (slow) error: {}", e))
+        .map_err(|e| error!("server error: {}", e))
 }
 
-async fn response(data: Vec<u8>) -> Result<Response<Body>, Error> {
+async fn response(request: Request<Body>, data: Vec<u8>) -> Result<Response<Body>, Error> {
     let std: f64 = 100.;
     let range = LogNormal::new(std.ln(), 4.0);
-    let delay = range.sample(&mut rand::thread_rng());
+    let delay = range.sample(&mut rand::thread_rng()) as u64;
 
-    Delay::new(Instant::now() + Duration::from_millis(delay as u64))
+    info!(
+        "{} {}. Sleeping {} ms",
+        request.method(),
+        request.uri(),
+        delay
+    );
+
+    Delay::new(Instant::now() + Duration::from_millis(delay))
         .compat()
         .await
         .context(Delaying)?;

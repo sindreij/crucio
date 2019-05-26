@@ -15,7 +15,7 @@ cargo install crucio
 You need to have a file with some content that used for healty responses.
 
 ```
-crucio
+RUST_LOG=crucio=info crucio
 ```
 
 Crucio listens to multiple ports. Each port will emulate one failure mode. Set your application

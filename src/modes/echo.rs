@@ -1,6 +1,7 @@
 /// This will just echo whatever it gets
 use std::net::SocketAddr;
 
+use log::{error, info};
 use tokio;
 use tokio::io;
 use tokio::net::TcpListener;
@@ -8,6 +9,7 @@ use tokio::prelude::*;
 
 pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
     let addr = addr.into();
+    info!("Listening on {}", addr);
     let listener = TcpListener::bind(&addr).unwrap();
 
     // Here we convert the `TcpListener` to a stream of incoming connections
@@ -16,6 +18,7 @@ pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
     listener
         .incoming()
         .for_each(|socket| {
+            info!("Got request");
             // split the socket stream into readable and writable parts
             let (reader, writer) = socket.split();
             // copy bytes from the reader into the writer
@@ -23,8 +26,8 @@ pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
 
             let msg = amount.then(|result| {
                 match result {
-                    Ok((amount, _, _)) => println!("wrote {} bytes", amount),
-                    Err(e) => println!("error: {}", e),
+                    Ok((_, _, _)) => {}
+                    Err(e) => error!("error: {}", e),
                 }
 
                 Ok(())
@@ -38,6 +41,6 @@ pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
         })
         .map_err(|err| {
             // Handle error by printing to STDOUT.
-            println!("accept error = {:?}", err);
+            error!("accept error = {:?}", err);
         })
 }

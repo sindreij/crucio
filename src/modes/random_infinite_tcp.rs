@@ -1,6 +1,7 @@
 /// This will return a fixed amount of noise, but not valid http.
 use std::net::SocketAddr;
 
+use log::{error, info};
 use rand::{rngs::StdRng, FromEntropy, RngCore};
 use tokio;
 use tokio::net::TcpListener;
@@ -8,6 +9,7 @@ use tokio::prelude::*;
 
 pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
     let addr = addr.into();
+    info!("Listening on {}", addr);
     let listener = TcpListener::bind(&addr).unwrap();
 
     // Here we convert the `TcpListener` to a stream of incoming connections
@@ -16,6 +18,7 @@ pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
     listener
         .incoming()
         .for_each(|mut socket| {
+            info!("Got request");
             let mut rng = StdRng::from_entropy();
             let future = stream::poll_fn(move || -> Poll<Option<()>, std::io::Error> {
                 let mut noise = [0u8; 32];
@@ -28,7 +31,7 @@ pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
             })
             .map_err(|err| {
                 // Handle error by printing to STDOUT.
-                println!("write noise error = {:?}", err);
+                error!("write noise error = {:?}", err);
             })
             .for_each(|()| Ok(()));
 
@@ -37,6 +40,6 @@ pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
         })
         .map_err(|err| {
             // Handle error by printing to STDOUT.
-            println!("accept error = {:?}", err);
+            error!("accept error = {:?}", err);
         })
 }

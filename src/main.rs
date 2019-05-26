@@ -2,6 +2,7 @@
 
 mod modes;
 
+use std::env;
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
@@ -22,6 +23,12 @@ struct Opt {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    if env::var_os("RUST_LOG").is_none() {
+        env::set_var("RUST_LOG", "crucio=info");
+    }
+
+    pretty_env_logger::init();
+
     let opt = Opt::from_args();
 
     let data = match opt.filename {

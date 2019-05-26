@@ -9,6 +9,7 @@ use futures::stream::unfold;
 use hyper::rt::Future;
 use hyper::service::service_fn;
 use hyper::{Body, Response, Server};
+use log::{error, info};
 use snafu::Snafu;
 use tokio::timer::Delay;
 
@@ -17,16 +18,20 @@ enum Error {}
 
 pub fn bind(data: &[u8], addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
     let addr = addr.into();
+    info!("Listening on {}", addr);
 
     let data = data.to_owned();
     let new_svc = move || {
         let data = data.clone();
-        service_fn(move |_| response(data.clone()).boxed().compat())
+        service_fn(move |request| {
+            info!("{} {}", request.method(), request.uri());
+            response(data.clone()).boxed().compat()
+        })
     };
 
     Server::bind(&addr)
         .serve(new_svc)
-        .map_err(|e| eprintln!("server (slow) error: {}", e))
+        .map_err(|e| error!("server error: {}", e))
 }
 
 async fn response(data: Vec<u8>) -> Result<Response<Body>, Error> {
