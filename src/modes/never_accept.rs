@@ -6,7 +6,7 @@ use tokio;
 use tokio::net::TcpListener;
 
 // This does not need to return a future since it does not do anything...
-pub fn start(addr: impl Into<SocketAddr>) {
+pub fn bind(addr: impl Into<SocketAddr>) {
     let addr = addr.into();
     let listener = TcpListener::bind(&addr).unwrap();
     // Will never call drop on listener

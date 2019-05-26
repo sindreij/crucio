@@ -1,10 +1,11 @@
 [package]
-name = "network-test-harness"
+name = "crucio"
 version = "0.1.0"
 authors = ["Sindre Ilebekk Johansen <sindre@sindrejohansen.no>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT/Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/sindreij/crucio"
 
 [dependencies]
 futures-preview = { version = "0.3.0-alpha.16", features = ["async-await", "nightly", "compat"] }

@@ -1,22 +1,6 @@
 #![feature(async_await)]
 
-mod always_error;
-mod drop;
-mod echo;
-mod forget_socket;
-mod healthy;
-mod never;
-mod never_accept;
-mod never_body;
-mod random;
-mod random_infinite_tcp;
-mod random_sleep;
-mod random_sleep_error;
-mod random_tcp;
-mod random_text;
-mod slow;
-mod slow_body;
-mod slow_error;
+mod modes;
 
 use std::error::Error;
 use std::fs::File;
@@ -33,6 +17,8 @@ use structopt::StructOpt;
 struct Opt {
     #[structopt(short = "f", long = "file", parse(from_os_str))]
     filename: PathBuf,
+    #[structopt(short = "p", long = "base-port")]
+    base_port: Option<u16>,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -43,25 +29,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     file.read_to_end(&mut contents)?;
 
     let bind_addr: Ipv4Addr = [127, 0, 0, 1].into();
+    let base_port = opt.base_port.unwrap_or(10000);
 
     rt::run(rt::lazy(move || {
-        rt::spawn(healthy::bind(&contents, (bind_addr, 3000)));
-        rt::spawn(slow::bind(&contents, (bind_addr, 3001)));
-        rt::spawn(slow_body::bind(&contents, (bind_addr, 3002)));
-        rt::spawn(random::bind((bind_addr, 3003)));
-        rt::spawn(random_text::bind((bind_addr, 3004)));
-        rt::spawn(never::bind((bind_addr, 3005)));
-        rt::spawn(never_body::bind((bind_addr, 3006)));
-        rt::spawn(echo::bind((bind_addr, 3007)));
-        rt::spawn(drop::bind((bind_addr, 3008)));
-        rt::spawn(forget_socket::bind((bind_addr, 3009)));
-        never_accept::start((bind_addr, 3010));
-        rt::spawn(random_tcp::bind((bind_addr, 3011)));
-        rt::spawn(random_infinite_tcp::bind((bind_addr, 3012)));
-        rt::spawn(random_sleep::bind(&contents, (bind_addr, 3013)));
-        rt::spawn(random_sleep_error::bind(&contents, (bind_addr, 3014)));
-        rt::spawn(always_error::bind((bind_addr, 3015)));
-        rt::spawn(slow_error::bind((bind_addr, 3016)));
+        modes::spawn_all(&contents, bind_addr, base_port);
         Ok(())
     }));
 
