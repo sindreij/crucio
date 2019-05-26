@@ -14,7 +14,7 @@ cargo install crucio
 You need to have a file with some content that used for healty responses.
 
 ```
-crucio --file index.txt --base-port 10000
+crucio
 ```
 
 Crucio listens to multiple ports. Each port will emulate one failure mode. Set your application
@@ -24,7 +24,7 @@ When `basePort` is `10000` (the default), this is the ports and their failure mo
 
 ### 10000 - Http Healthy
 
-No failire modes, it returns the input file given with no delay.
+The control. Healthy response, it returns the input file given with no delay.
 
 ### 10001 - Http Slow
 

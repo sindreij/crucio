@@ -1,1 +1,2 @@
 - Low level errors, like when the service does not ACK
+- Logging
