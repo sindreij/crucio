@@ -1,7 +1,6 @@
 # Crucio
 
-Crucio is a test harness used to see how a webservice behaves when its dependencies has
-some kind of fault.
+Crucio is a test harness used to see how a webservice behaves when its dependencies has a specific failure mode.
 
 ## Installation
 

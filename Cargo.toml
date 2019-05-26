@@ -6,6 +6,7 @@ edition = "2018"
 license = "MIT/Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/sindreij/crucio"
+description = "Crucio is a test harness used to see how a webservice behaves when its dependencies has a specific failure mode."
 
 [dependencies]
 futures-preview = { version = "0.3.0-alpha.16", features = ["async-await", "nightly", "compat"] }
