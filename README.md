@@ -5,6 +5,8 @@ some kind of fault.
 
 ## Installation
 
+Rust nightly is required (until async/await is stable).
+
 ```
 cargo install crucio
 ```
