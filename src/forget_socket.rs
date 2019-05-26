@@ -1,4 +1,6 @@
 /// This will just echo whatever it gets
+/// This may be exactly the same as never.rs
+use std::mem;
 use std::net::SocketAddr;
 
 use tokio;
@@ -14,7 +16,11 @@ pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
     // the stream with the `for_each` combinator method
     listener
         .incoming()
-        .for_each(|_socket| Ok(()))
+        .for_each(|socket| {
+            // Make sure drop() on socket is never called, i.e. the connection will never be closed
+            mem::forget(socket);
+            Ok(())
+        })
         .map_err(|err| {
             // Handle error by printing to STDOUT.
             println!("accept error = {:?}", err);

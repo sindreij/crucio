@@ -1,4 +1,4 @@
-/// Returns the response with the body, but wait some time before delivering it
+/// Always fails with 500 - internal server error, but with a delay
 use std::net::SocketAddr;
 use std::time::{Duration, Instant};
 
@@ -7,6 +7,8 @@ use futures::{FutureExt, TryFutureExt};
 use hyper::rt::Future;
 use hyper::service::service_fn;
 use hyper::{Body, Response, Server};
+use rand::distributions::LogNormal;
+use rand::prelude::*;
 use snafu::{ResultExt, Snafu};
 use tokio::timer::Delay;
 
@@ -15,25 +17,24 @@ enum Error {
     Delaying { source: tokio::timer::Error },
 }
 
-pub fn bind(data: &[u8], addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
+pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
     let addr = addr.into();
 
-    let data = data.to_owned();
-    let new_svc = move || {
-        let data = data.clone();
-        service_fn(move |_| response(data.clone()).boxed().compat())
-    };
+    let new_svc = move || service_fn(move |_| response().boxed().compat());
 
     Server::bind(&addr)
         .serve(new_svc)
-        .map_err(|e| eprintln!("server (slow) error: {}", e))
+        .map_err(|e| eprintln!("server (error) error: {}", e))
 }
 
-async fn response(data: Vec<u8>) -> Result<Response<Body>, Error> {
+async fn response() -> Result<Response<Body>, Error> {
     Delay::new(Instant::now() + Duration::from_secs(9))
         .compat()
         .await
         .context(Delaying)?;
 
-    Ok(Response::new(Body::from(data)))
+    Ok(Response::builder()
+        .status(500)
+        .body(Body::from("500 - Internal Server Error"))
+        .unwrap())
 }

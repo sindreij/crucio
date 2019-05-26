@@ -1,7 +1,9 @@
-/// This will just echo whatever it gets
+/// This will return a fixed amount of noise, but not valid http.
 use std::net::SocketAddr;
 
+use rand::{rngs::StdRng, FromEntropy, RngCore};
 use tokio;
+use tokio::io;
 use tokio::net::TcpListener;
 use tokio::prelude::*;
 
@@ -14,7 +16,17 @@ pub fn bind(addr: impl Into<SocketAddr>) -> impl Future<Item = (), Error = ()> {
     // the stream with the `for_each` combinator method
     listener
         .incoming()
-        .for_each(|_socket| Ok(()))
+        .for_each(|socket| {
+            let mut rng = StdRng::from_entropy();
+            let mut noise = vec![0u8; 128];
+            rng.fill_bytes(&mut noise);
+
+            tokio::spawn(io::write_all(socket, noise).map(|_| ()).map_err(|err| {
+                // Handle error by printing to STDOUT.
+                println!("error writing noise to socket = {:?}", err);
+            }));
+            Ok(())
+        })
         .map_err(|err| {
             // Handle error by printing to STDOUT.
             println!("accept error = {:?}", err);
