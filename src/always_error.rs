@@ -1,16 +1,12 @@
 /// Always fails with 500 - internal server error
 use std::net::SocketAddr;
-use std::time::{Duration, Instant};
 
-use futures::compat::Future01CompatExt;
 use futures::{FutureExt, TryFutureExt};
 use hyper::rt::Future;
 use hyper::service::service_fn;
 use hyper::{Body, Response, Server};
-use rand::distributions::LogNormal;
-use rand::prelude::*;
-use snafu::{ResultExt, Snafu};
-use tokio::timer::Delay;
+
+use snafu::Snafu;
 
 #[derive(Debug, Snafu)]
 enum Error {

@@ -7,8 +7,7 @@ use futures::{FutureExt, TryFutureExt};
 use hyper::rt::Future;
 use hyper::service::service_fn;
 use hyper::{Body, Response, Server};
-use rand::distributions::LogNormal;
-use rand::prelude::*;
+
 use snafu::{ResultExt, Snafu};
 use tokio::timer::Delay;
 
